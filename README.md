@@ -1,115 +1,86 @@
 # NativeTouch
 
-NativeTouch is a macOS utility to map specialized HID touch devices (Anmite / Prechen) as virtual mouse input across multiple displays.
+NativeTouch is a lightweight macOS utility that lets compatible touch screens and digitizers control your cursor in a predictable way.
 
-## 🚀 What it does
+Instead of built-in touch behavior that may feel noisy and inconsistent, NativeTouch maps touch input to pointer movement, clicks, dragging, and optional scrolling using a dedicated touchscreen profile.
 
-- Detects Anmite and Prechen HID devices by vendor/product IDs.
-- Converts touch events into mouse movement, click, scroll, and drag actions.
-- Supports a “iOS-like” scroll mode (drag-style scrolling over target monitor) with inertia.
-- Offers per-device settings in macOS menu bar:
-  - Target monitor selection
-  - iOS Scroll Mode toggle
-  - Restore cursor position on touch-up
-  - Invert X/Y axes
-  - Swap X/Y axes
-- Keeps a background accessory app (no dock icon) and prevents App Nap for uninterrupted operation.
+## Features
 
-## 🧩 Requirements
+- Auto-discover touch/digitizer devices and handle hot-plug connect/disconnect
+- Per-device settings with menu bar status and quick enable/disable
+- Target monitor selector (map touch to specific display)
+- Normalized tap, drag, and click gestures
+- Long-press for right-click behavior
+- Optional scroll mode with momentum support
+- Invert X/Y, swap axes, and restore cursor position on release
+- Optional launch at login integration
 
-- macOS (Intel or Apple Silicon with compatibility of Swift frameworks)
-- Xcode command-line tools installed (`xcode-select --install`)
-- Privacy permissions:
-  - Accessibility
-  - Input Monitoring
-  - (Optionally) Full Disk Access not required
+## Supported Interactions
 
-## 🛠️ Build & Run
+- Left click
+- Right click (long press)
+- Drag and cursor movement
+- Scroll gestures from touch motion
 
-From project root:
+## Limitations
+
+- Not a general mouse emulator for every USB HID input
+- Not designed for handwriting/pen pressure functionality
+- Not a gesture ioctl layer (no pinch/zoom/two-finger Scroll) beyond the defined touch-to-pointer mapping
+
+## Install
+
+1. Clone repository:
+
+```bash
+git clone https://github.com/xperiments/NativeTouch.git
+cd NativeTouch
+```
+
+2. Build:
 
 ```bash
 ./build.sh
+```
+
+3. Open app:
+
+```bash
 open NativeTouch.app
 ```
 
-`build.sh`:
-- Compiles Swift sources in `src/*.swift`
-- Creates `NativeTouch.app` bundle
-- Converts icons from `icons/AppIcons/Assets.xcassets/AppIcon.appiconset` -> `NativeTouch.icns`
-- Copies icon to `NativeTouch.app/Contents/Resources/` and sets `CFBundleIconFile` in `Info.plist`
-- Generates `Info.plist` with required metadata
-- Registers app with LaunchServices
-- Applies ad-hoc codesign
-- Resets TCC permissions with `tccutil reset All io.xperiments.nativetouch`
+> Do not run the app with `sudo`.
 
-## ⚠️ First run
+4. Grant Accessibility permissions when prompted.
 
-Upon first launch, grant these requests in System Settings > Privacy & Security:
+## Package for distribution
 
-1. Accessibility
-2. Input Monitoring
+```bash
+./pack.sh
+```
 
-If prompted to restart or re-open NativeTouch, follow instructions.
+This creates `NativeTouch.zip` containing `install.command` and the app bundle.
 
-## 📁 Project structure
+## Development notes
 
-- `build.sh` – build script and permissions reset flow
-- `src/main.swift` – main app lifecycle and HID listener
-- `src/Config.swift` – vendor/product constants and logging
-- `src/EventHandlers.swift` – touch handling, mode behavior, pointer generation
-- `src/AppDelegate.swift` – menu and preference toggles, display change handling
-- `NativeTouch.app/` – generated app bundle (build artifact)
+- Main code paths:
+  - `src/main.swift` sets up IOHID manager and run loop
+  - `src/TouchState.swift` stores device profiles/configuration
+  - `src/TouchHIDHandlers.swift` handles device add/remove/input callbacks
+- `src/MenuBuilder.swift` and `src/SettingsWindowController.swift` handle the UI and settings panel
 
-## 🔧 Settings
+## Troubleshooting
 
-Access the menu bar icon to adjust behavior per connected device.
+- If the app captures your normal mouse, make sure the device is recognized as digitizer during discovery and not a standard mouse/trackball.
+- If touch behaves incorrectly, adjust `ScrollMode`, axis invert, and display target in settings.
 
-- `Target Monitor` selects target display
-- `iOS Scroll Mode` for touch drag scrolling
-- `Restore on Touch Up` resets cursor return behavior
-- `Invert X / Invert Y / Swap X/Y` for coordinate correction
+## Contributing
 
-## 💡 Advanced notes
+- Improve HID filtering
+- Add more device-specific presets
+- Add proper from-scratch gestures and multi-touch emulation
 
-- Uses `IOHIDManagerOpen(..., kIOHIDOptionsTypeSeizeDevice)` when possible to avoid OS device conflicts.
-- Uses `CGEvent` injection for mouse and scrolling events.
-- Maintains momentum and prevents accidental drag or text-select jitter.
+## License
 
-## 🎮 HID Reports & Device Compatibility
+(Choose your license and add here)
 
-NativeTouch is fundamentally a raw coordinate and tap interpreter, making it highly compatible with a large variety of generic touch displays and absolute pointing devices not officially supported by macOS. 
-
-Specifically, the engine listens for the following **HID Usage Pages** and **Usages**:
-- **Movement (Absolute Coordinates)**:
-  - `Usage Page: 0x01` (Generic Desktop)
-  - `Usage: 0x30` (X Axis) and `0x31` (Y Axis)
-  - The raw integer values are normalized using the logical minimum and maximum values defined in the device's HID descriptor (`IOHIDElementGetLogicalMin/Max`), meaning it adapts automatically to screens of different physical resolutions.
-- **Touch / Click Events**:
-  - `Usage Page: 0x0D` (Digitizer) with `Usage: 0x42` (Tip Switch) — Standard for most modern touchscreen panels.
-  - *Fallback*: `Usage Page: 0x09` (Button) with `Usage: 0x01` (Button 1) — Used by some older or more generic panels that identify simply as absolute mice.
-
-### Adding your own device
-Because it relies on these universal industry-standard HID descriptors, adapting NativeTouch for **other brands and models** is incredibly easy. 
-If your touch monitor misbehaves on macOS but acts as standard USB HID, you can add it perfectly by simply putting its Vendor ID and Product ID into the `~/Library/Application Support/NativeTouch/devices.json` configuration file. No code changes required!
-
-## 🐛 Troubleshooting
-
-- If mapping seems stuck, quit and relaunch tools:
-  - `killall NativeTouch`
-  - `open NativeTouch.app`
-- If permissions misbehave, run:
-  - `tccutil reset All io.xperiments.nativetouch`
-  - Re-open app and re-grant permissions.
-
-## 📦 Packaging
-
-The app is not signed on App Store for distribution. For local use, use ad-hoc signing in `build.sh`.
-
-## 🤝 Contribution
-
-Fork this repo, implement features, and open PR with details.
-
----
-
-*Generated from source analysis on March 20, 2026.*
