@@ -5,6 +5,8 @@
 APP_NAME="NativeTouch.app"
 EXECUTABLE_NAME="NativeTouch"
 SOURCE_FILES="src/*.swift"
+CFBUNDLE_SHORT_VERSION="1.0"
+CFBUNDLE_VERSION="1"
 
 echo "🧹 Limpiando build anterior..."
 rm -rf "$APP_NAME"
@@ -126,9 +128,9 @@ cat > "$APP_NAME/Contents/Info.plist" <<PLIST_EOF
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>${CFBUNDLE_SHORT_VERSION}</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>${CFBUNDLE_VERSION}</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHighResolutionCapable</key>
