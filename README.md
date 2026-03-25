@@ -1,3 +1,5 @@
+
+![](icons/AppIcons/Assets.xcassets/AppIcon.appiconset/256.png)
 # NativeTouch
 
 NativeTouch is a lightweight macOS utility that lets compatible touch screens and digitizers control your cursor in a predictable way.
@@ -15,6 +17,8 @@ Instead of built-in touch behavior that may feel noisy and inconsistent, NativeT
 - Invert X/Y, swap axes, and restore cursor position on release
 - Optional launch at login integration
 
+![settings](media/settings.png)
+
 ## Supported Interactions
 
 - Left click
@@ -28,57 +32,49 @@ Instead of built-in touch behavior that may feel noisy and inconsistent, NativeT
 - Not designed for handwriting/pen pressure functionality
 - Not a gesture ioctl layer (no pinch/zoom/two-finger Scroll) beyond the defined touch-to-pointer mapping
 
-## Install
+## Install NativeTouch (macOS)
 
-1. Clone repository:
+1. Download latest zip from [releases](https://github.com/xperiments/NativeTouch/releases)
+2. **Drag NativeTouch into your Applications folder.**
+   > **Note:** This is a crucial step. Running the app from your Downloads folder can cause "Translocation" errors that break its functionality.
 
-```bash
-git clone https://github.com/xperiments/NativeTouch.git
-cd NativeTouch
-```
 
-2. Build:
+### First Time Launch
 
-```bash
-./build.sh
-```
+Because NativeTouch is an independent tool, macOS needs a quick "manual handshake" to trust it.
 
-3. Open app:
+1.  Open the **Terminal** app.
+2.  Paste the following command and press **Enter**:
+    ```bash
+    xattr -rd com.apple.quarantine /Applications/NativeTouch.app
+    ```
+3.  Go to your **Applications** folder.
+4.  **Right-click** NativeTouch and select **Open**.
+5.  Click **Open** one last time on the popup.
 
-```bash
-open NativeTouch.app
-```
+### Granting Permissions
 
-> Do not run the app with `sudo`.
+![permisions](media/permisions.png)
 
-4. Grant Accessibility permissions when prompted.
+Once the app starts, you will see a request for **Accessibility Access**. This is required so the app can convert your device's touch data into mouse movements.
 
-## Package for distribution
+1.  Click **Open Privacy Settings** in the popup.
+2.  In the window that opens, find **NativeTouch** in the list.
+3.  **Toggle the switch to ON** (you may need to enter your Mac password).
+4.  NativeTouch will detect the change and prompt you to **Relaunch**. 
 
-```bash
-./pack.sh
-```
+**Success!** The app is now ready to use.
 
-This creates `NativeTouch.zip` containing `install.command` and the app bundle.
+### ⚡ Troubleshooting: "App won't open"
 
-## Development notes
+![gatekeeper](media/gatekeeper.png)
 
-- Main code paths:
-  - `src/main.swift` sets up IOHID manager and run loop
-  - `src/TouchState.swift` stores device profiles/configuration
-  - `src/TouchHIDHandlers.swift` handles device add/remove/input callbacks
-- `src/MenuBuilder.swift` and `src/SettingsWindowController.swift` handle the UI and settings panel
+If the app still refuses to launch after Step 2:
+1.  Go to **System Settings → Privacy & Security**.
+2.  Scroll down to the **Security** section.
+3.  Look for a message saying "NativeTouch was blocked" and click **Open Anyway**.
 
-## Troubleshooting
-
-- If the app captures your normal mouse, make sure the device is recognized as digitizer during discovery and not a standard mouse/trackball.
-- If touch behaves incorrectly, adjust `ScrollMode`, axis invert, and display target in settings.
-
-## Contributing
-
-- Improve HID filtering
-- Add more device-specific presets
-- Add proper from-scratch gestures and multi-touch emulation
+![privacy](media/privacy.png)
 
 ## License
 
