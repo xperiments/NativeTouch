@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+.TemporaryItems
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Xcode
+DerivedData/
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+*.xccheckout
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Swift package manager
+.build/
+
+# App bundle output (if built locally)
+NativeTouch.app/
+
+# User settings
+*.swp
+*~
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+*/.DS_Store
+*/.AppleDouble
+
+# Archives
+*.zip
